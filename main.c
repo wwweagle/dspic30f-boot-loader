@@ -101,19 +101,23 @@ void WriteEE(char *, uReg32);
 void WriteCM(char *, uReg32);
 void ResetDevice(void);
 
+void LoadAddr(UWord16 HW, UWord16 LW);
+void WriteMem(int addr); /*Erase  page  */
+void WriteLatch(UWord16 HW, UWord16 LW, UWord16 HWx, UWord16 LWx);
+
 char Buffer[PM_ROW_SIZE * 3 + 1];
 
 /******************************************************************************/
 int main(void) {
-    
+
     TRISB = 0xFCFF; //Multiplexor ~EN
     LATB = 0x0300;
-    TRISD = 0x0FF0;//Multiplexor ~EN, Status LED
+    TRISD = 0x0FF0; //Multiplexor ~EN, Status LED
     LATD = 0xF000;
-        
+
     TRISF = 0xFFDF; //UART2
     TRISE = 0xfcff;
-    LATE = 0;//Suppress laser
+    LATE = 0; //Suppress laser
 
     U2BRG = BRGVAL;
     U2MODE = 0x8000; /* Reset UART to 8-n-1, alt pins, and enable */
