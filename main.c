@@ -107,8 +107,12 @@ void WriteLatch(UWord16 HW, UWord16 LW, UWord16 HWx, UWord16 LWx);
 
 char Buffer[PM_ROW_SIZE * 3 + 1];
 
+volatile int writingPM = 0;
+
 /******************************************************************************/
 int main(void) {
+    //    int writePM=0;
+
 
     TRISB = 0xFCFF; //Multiplexor ~EN
     LATB = 0x0300;
@@ -128,6 +132,7 @@ int main(void) {
         char Command;
 
         GetChar(&Command);
+
 
         switch (Command) {
             case COMMAND_READ_PM:
@@ -163,6 +168,7 @@ int main(void) {
 
             case COMMAND_WRITE_PM:
             {
+                writingPM = 1;
                 uReg32 SourceAddr;
                 int Size;
 
@@ -406,7 +412,12 @@ void GetChar(char * ptrChar) {
             Nop();
             PORTDbits.RD14 = 0;
         }
+        if (largeCounter > 2 && counter == 0 && writingPM == 1) {
+            PutChar(COMMAND_NACK);
+        }
+
         /* if timer expired, signal to application to jump to user code */
+
         if (largeCounter > 10) {
             PORTDbits.RD15 = 0;
             Nop();
@@ -417,6 +428,7 @@ void GetChar(char * ptrChar) {
             * ptrChar = COMMAND_NACK;
             break;
         }
+
 
         /* check for receive errors */
         if (U2STAbits.FERR == 1) {
